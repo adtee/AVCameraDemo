@@ -58,6 +58,7 @@ class ViewController: UIViewController {
     }
     
     //MARK: Recording image animation
+    ///animate recording image while video is capturing
     func animateRecordingImage(should animate : Bool){
         if animate{
         UIView.animate(withDuration: 0.8, delay: 0, options: [.repeat,.curveEaseInOut], animations: {
@@ -66,6 +67,7 @@ class ViewController: UIViewController {
             self.imageViewRecording.transform = .identity
         }
         }else{
+            self.imageViewRecording.transform = .identity
             self.imageViewRecording.layer.removeAllAnimations()
         }
     }
@@ -76,6 +78,7 @@ class ViewController: UIViewController {
 extension ViewController : AVcameraViewDelegate{
     
     //MARK: AVCamera setup
+    ///setup AVCameraview properties
     func setupCamera(){
         viewCamera.cameraDelegate = self
         viewCamera.shouldUseDeviceOrientation = true
@@ -83,6 +86,7 @@ extension ViewController : AVcameraViewDelegate{
     }
     
     //MARK: AVCamera Delegate
+    
     func AVcameraView(didBeginRecordingVideo camera: AVcameraView.CameraSelection) {
         print("Did Begin Recording")
         imageViewRecording.isHidden = false
@@ -109,7 +113,7 @@ extension ViewController : AVcameraViewDelegate{
 
     func AVcameraView( didFinishProcessVideoAt url: URL) {
         //save video to lib
-        
+
         func handleViewSaveAction(savedSuccessfully : Bool){
             self.hideActivityIndicator()
             self.labelTimeDuration.text = "00:00"
@@ -118,7 +122,7 @@ extension ViewController : AVcameraViewDelegate{
                 self.showOkAlert(withTitle: "AVCameraDemo", message: savedSuccessfully ? "Succesfully created video and saved in your photo library." : "Failed to create video.please try again.")
             }
         }
-        
+    
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
         }) { saved, error in

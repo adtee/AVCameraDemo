@@ -28,6 +28,7 @@ class ActivityIndicatorView : UIView{
     
     let viewBoundingBox = UIView(frame: .zero)
     
+    ///Message to show while showing activity indication
     var activityDescription : String = "Loading"{
         didSet{
             labelAcitivityDescription.text = activityDescription
@@ -52,6 +53,7 @@ class ActivityIndicatorView : UIView{
     }
     
     //MARK: Setup activity Indicator
+
     private func setupInitialUI(){
         
         self.backgroundColor = UIColor.black.withAlphaComponent(0.5)
@@ -70,6 +72,7 @@ class ActivityIndicatorView : UIView{
     override func layoutSubviews() {
         super.layoutSubviews()
         
+        ///Manage layout of Activity view
         func setupFrames(){
                    viewBoundingBox.frame.size.width =  160.0
                    viewBoundingBox.frame.size.height = 160.0
