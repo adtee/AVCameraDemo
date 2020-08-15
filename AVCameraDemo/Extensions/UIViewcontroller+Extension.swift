@@ -45,6 +45,7 @@ extension UIViewController{
         DispatchQueue.main.async {
             let alertController = UIAlertController(title: withTitle, message: message, preferredStyle: .alert)
             alertController.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+            alertController.view.tintColor = UIColor(named: "AppColorBlue")
             self.present(alertController, animated: true, completion: nil)
         }
     }

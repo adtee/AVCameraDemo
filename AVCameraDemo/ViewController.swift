@@ -89,26 +89,32 @@ extension ViewController : AVcameraViewDelegate{
     
     func AVcameraView(didBeginRecordingVideo camera: AVcameraView.CameraSelection) {
         print("Did Begin Recording")
-        imageViewRecording.isHidden = false
-        
-        UIView.animate(withDuration: 0.25, animations: {
-            self.buttonFlash.alpha = 0.0
-            self.buttonCameraSelection.alpha = 0.0
-        })
+        DispatchQueue.main.async {
+            self.imageViewRecording.isHidden = false
+            
+            UIView.animate(withDuration: 0.25, animations: {
+                self.buttonFlash.alpha = 0.0
+                self.buttonCameraSelection.alpha = 0.0
+            })
+        }
     }
     
     func AVcameraView(recorded timeString: String) {
-        labelTimeDuration.text = timeString
+        DispatchQueue.main.async {
+            self.labelTimeDuration.text = timeString
+        }
     }
     
     func AVcameraView(didFinishRecordingVideo camera: AVcameraView.CameraSelection) {
         print("Did finish Recording")
-        self.showActivityIndicatior(withMessage: "Processing Video")
-        imageViewRecording.isHidden = true
-        UIView.animate(withDuration: 0.25, animations: {
-            self.buttonFlash.alpha = 1.0
-            self.buttonCameraSelection.alpha = 1.0
-        })
+        DispatchQueue.main.async {
+            self.showActivityIndicatior(withMessage: "Processing Video")
+            self.imageViewRecording.isHidden = true
+            UIView.animate(withDuration: 0.25, animations: {
+                self.buttonFlash.alpha = 1.0
+                self.buttonCameraSelection.alpha = 1.0
+            })
+        }
     }
 
     func AVcameraView( didFinishProcessVideoAt url: URL) {

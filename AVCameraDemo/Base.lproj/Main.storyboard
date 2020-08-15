@@ -98,14 +98,20 @@
                                     <constraint firstAttribute="trailing" secondItem="Mou-bh-Uur" secondAttribute="trailing" id="bls-fa-TOs"/>
                                     <constraint firstItem="Kw9-qI-NQz" firstAttribute="centerX" secondItem="Y96-c1-g6C" secondAttribute="centerX" id="mhW-VO-v8x"/>
                                     <constraint firstAttribute="trailing" secondItem="HSh-81-AeF" secondAttribute="trailing" id="wYf-cI-EsZ"/>
-                                    <constraint firstItem="HSh-81-AeF" firstAttribute="height" secondItem="Y96-c1-g6C" secondAttribute="height" multiplier="0.15" id="xrm-og-5dg"/>
+                                    <constraint firstItem="HSh-81-AeF" firstAttribute="height" secondItem="Y96-c1-g6C" secondAttribute="height" multiplier="0.15" id="xrm-og-5dg">
+                                        <variation key="heightClass=compact-widthClass=regular" constant="26"/>
+                                        <variation key="heightClass=regular-widthClass=compact" constant="0.0"/>
+                                    </constraint>
                                 </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" name="AppColorBlue"/>
                         <constraints>
                             <constraint firstItem="Y96-c1-g6C" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="CTc-AR-sKK"/>
-                            <constraint firstItem="Y96-c1-g6C" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="FbS-Yi-WoI"/>
+                            <constraint firstItem="Y96-c1-g6C" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="FbS-Yi-WoI">
+                                <variation key="heightClass=compact-widthClass=regular" constant="16"/>
+                                <variation key="heightClass=regular-widthClass=compact" constant="0.0"/>
+                            </constraint>
                             <constraint firstItem="Y96-c1-g6C" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="a4B-cn-SzT"/>
                             <constraint firstAttribute="bottom" secondItem="Y96-c1-g6C" secondAttribute="bottom" id="sff-pK-sbp"/>
                         </constraints>

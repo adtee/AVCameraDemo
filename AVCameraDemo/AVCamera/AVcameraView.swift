@@ -207,15 +207,14 @@ open class AVcameraView: UIView {
             sessionQueue.async {
                 switch self.setupResult {
                 case .success:
-                    // Begin Session
-                    self.session.startRunning()
-                    self.isSessionRunning = self.session.isRunning
-                    
-                    // Preview layer video orientation can be set only after the connection is created
+                   
                     DispatchQueue.main.async {
+                        // Begin Session
+                        self.session.startRunning()
+                        self.isSessionRunning = self.session.isRunning
+                        // Preview layer video orientation can be set only after the connection is created
                         self.previewLayer.videoPreviewLayer.connection?.videoOrientation = self.getPreviewLayerOrientation()
                     }
-                    
                 case .notAuthorized:
                     // Prompt to App Settings
                     self.promptToAppSettings()
@@ -230,39 +229,46 @@ open class AVcameraView: UIView {
         
         
         //Add preview layer
-        previewLayer = AVCameraPreviewView(frame: self.bounds, videoGravity: .resizeAspectFill)
-        self.addSubview(previewLayer)
-        self.sendSubviewToBack(previewLayer)
-        
-        // Add Gesture Recognizers
-        
-        addGestureRecognizers()
-        
-        //Assign previewLayer
-        previewLayer.session = session
-        
-        //check authorisation
-        checkVideoCaptureAuthorisation()
-        
-        // Subscribe to device rotation notifications
-        
-        if shouldUseDeviceOrientation {
-            subscribeToDeviceOrientationChangeNotifications()
+        DispatchQueue.main.async {
+            self.previewLayer = AVCameraPreviewView(frame: self.bounds, videoGravity: .resizeAspectFill)
+            self.addSubview(self.previewLayer)
+            self.sendSubviewToBack(self.previewLayer)
+            
+            // Add Gesture Recognizers
+            self.addGestureRecognizers()
+            
+            //Assign previewLayer
+            self.previewLayer.session = self.session
+            
+            //check authorisation
+            checkVideoCaptureAuthorisation()
         }
         
-        // Set background audio preference
-        setBackgroundAudioPreference()
+       
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.2) {
+            // Subscribe to device rotation notifications
+            
+            if self.shouldUseDeviceOrientation {
+                self.subscribeToDeviceOrientationChangeNotifications()
+            }
+            
+            // Set background audio preference
+            self.setBackgroundAudioPreference()
+            
+            //Check authorisation result
+            validateAuthorisationResult()
+        }
         
-        //Check authorisation result
-        validateAuthorisationResult()
     }
     
     
     // MARK: ViewDidLayoutSubviews
     
     private func updatePreviewLayer(layer: AVCaptureConnection, orientation: AVCaptureVideoOrientation) {
-        layer.videoOrientation = orientation
-        previewLayer.frame = self.frame
+        DispatchQueue.main.async {
+            layer.videoOrientation = orientation
+            self.previewLayer.frame = self.frame
+        }
     }
     
     open override func layoutSubviews() {
@@ -290,13 +296,10 @@ open class AVcameraView: UIView {
                     }
                 }
             }
-            
-            
         }
         
-        DispatchQueue.main.async {
-            setupPreviewLayerOrientation()
-        }
+        setupPreviewLayerOrientation()
+       
         
     }
     
@@ -367,7 +370,6 @@ open class AVcameraView: UIView {
     @objc func update(){
         let currenTime = CMTimeGetSeconds((self.movieFileOutput?.recordedDuration) ?? CMTime.zero)
         let timeString = String.init().appendingFormat("%.2d:%.2d",Int(currenTime/60),Int(currenTime.truncatingRemainder(dividingBy: 60)))
-        print("timeString \(timeString) \(currenTime)")
         self.cameraDelegate?.AVcameraView(recorded:timeString)
     }
     
