@@ -104,9 +104,7 @@ open class AVcameraView: UIView {
     // MARK: Variable Declarations
     
     public weak var cameraDelegate : AVcameraViewDelegate?
-    
-    public var maximumVideoDuration : Double = 0.0
-    
+        
     public var videoQuality : VideoQuality = .high
     
     public var flashEnabled = false
@@ -119,13 +117,8 @@ open class AVcameraView: UIView {
     
     public var shouldUseDeviceOrientation = false
     
-    public var allowAutoRotate = false
     
-    public var videoGravity : AVCameraVideoRecordingGravity = .resizeAspect
-    
-    
-    // MARK: Get-only Variable Declarations
-    
+    //MARK: Observation variable
     private(set) public var isVideoRecording = false
     
     private(set) public var isSessionRunning = false
@@ -156,9 +149,7 @@ open class AVcameraView: UIView {
     fileprivate var previewLayer : AVCameraPreviewView!
     
     fileprivate var deviceOrientation : UIDeviceOrientation?
-    
-    /// Disable view autorotation for forced portrait recorindg
-    
+        
     fileprivate var timer : Timer!
     
     // MARK: Init
@@ -242,6 +233,7 @@ open class AVcameraView: UIView {
             
             //check authorisation
             checkVideoCaptureAuthorisation()
+            
         }
         
        
@@ -325,6 +317,11 @@ open class AVcameraView: UIView {
     
     ///Start recording video session
     public func startVideoRecording() {
+        
+        guard self.session.isRunning == true else {
+            return
+        }
+        
         guard let movieFileOutput = self.movieFileOutput else {
             return
         }
@@ -355,10 +352,12 @@ open class AVcameraView: UIView {
                 let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
                 movieFileOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
                 self.isVideoRecording = true
+
                 DispatchQueue.main.async {
-                    self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.update), userInfo: nil, repeats: true)
+                    self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.updateTime), userInfo: nil, repeats: true)
                     self.cameraDelegate?.AVcameraView(didBeginRecordingVideo: self.currentCamera)
                 }
+                
             }
             else {
                 movieFileOutput.stopRecording()
@@ -367,23 +366,28 @@ open class AVcameraView: UIView {
     }
     
     ///Monitor the time and update video capture time
-    @objc func update(){
+    @objc func updateTime(){
+        
         let currenTime = CMTimeGetSeconds((self.movieFileOutput?.recordedDuration) ?? CMTime.zero)
         let timeString = String.init().appendingFormat("%.2d:%.2d",Int(currenTime/60),Int(currenTime.truncatingRemainder(dividingBy: 60)))
-        self.cameraDelegate?.AVcameraView(recorded:timeString)
+        print("current time \(currenTime) & Display text is \(timeString)")
+        DispatchQueue.main.async {
+            self.cameraDelegate?.AVcameraView(recorded:timeString)
+        }
     }
     
     
     ///Stop recording video capturing
     public func stopVideoRecording() {
-        if self.movieFileOutput?.isRecording == true {
-            self.isVideoRecording = false
-            movieFileOutput!.stopRecording()
-            disableFlash()
-            
-            DispatchQueue.main.async {
-                self.timer.invalidate()
-                self.cameraDelegate?.AVcameraView(didFinishRecordingVideo: self.currentCamera)
+        sessionQueue.async {
+            if self.movieFileOutput?.isRecording == true {
+                self.isVideoRecording = false
+                self.movieFileOutput!.stopRecording()
+                self.disableFlash()
+                DispatchQueue.main.async {
+                    self.timer.invalidate()
+                    self.cameraDelegate?.AVcameraView(didFinishRecordingVideo: self.currentCamera)
+                }
             }
         }
     }
@@ -428,9 +432,6 @@ open class AVcameraView: UIView {
             
             self.session.startRunning()
         }
-        
-        // If flash is enabled, disable it as the torch is needed for front facing camera
-        disableFlash()
     }
     
     // MARK: Video Capture Functions
@@ -441,7 +442,6 @@ open class AVcameraView: UIView {
         guard setupResult == .success else {
             return
         }
-        
         // Set default camera
         
         currentCamera = defaultCamera
@@ -453,7 +453,6 @@ open class AVcameraView: UIView {
         addVideoInput()
         addAudioInput()
         configureVideoOutput()
-        
         session.commitConfiguration()
     }
     
@@ -777,33 +776,29 @@ open class AVcameraView: UIView {
 
 extension AVcameraView : AVCaptureFileOutputRecordingDelegate {
     
+     /// Process newly captured video and write it to temporary directory
     public func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        
+        if UIDevice.current.isMultitaskingSupported && self.backgroundRecordingID != nil{
+            UIApplication.shared.endBackgroundTask(self.backgroundRecordingID!)
+            self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
+        }
+        
+        if error != nil, let videoRecordingError = error{
+            DispatchQueue.main.async {
+                self.cameraDelegate?.AVcameraView(didFailToRecordVideo: videoRecordingError)
+            }
+            return
+        }
+        
+        
+        //Call delegate function with the URL of the outputfile
         DispatchQueue.main.async {
             self.cameraDelegate?.AVcameraView(didFinishProcessVideoAt: outputFileURL)
         }
+        
     }
-    
-    /// Process newly captured video and write it to temporary directory
-    
-    public func capture(_ captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAt outputFileURL: URL!, fromConnections connections: [Any]!, error: Error!) {
-        if let currentBackgroundRecordingID = backgroundRecordingID {
-            backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
-            
-            if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
-                UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
-            }
-        }
-        if error != nil {
-            DispatchQueue.main.async {
-                self.cameraDelegate?.AVcameraView(didFailToRecordVideo: error)
-            }
-        } else {
-            //Call delegate function with the URL of the outputfile
-            DispatchQueue.main.async {
-                self.cameraDelegate?.AVcameraView(didFinishProcessVideoAt: outputFileURL)
-            }
-        }
-    }
+  
 }
 
 // Mark: UIGestureRecognizer Declarations

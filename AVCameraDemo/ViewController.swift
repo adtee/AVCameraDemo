@@ -25,6 +25,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var buttonFlash: UIButton!
     @IBOutlet weak var buttonCameraSelection: UIButton!
     
+    
+    //MARK: Viewcontroller lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -57,15 +59,13 @@ class ViewController: UIViewController {
         viewCamera.switchCamera()
     }
     
+    
     //MARK: Recording image animation
     ///animate recording image while video is capturing
     func animateRecordingImage(should animate : Bool){
         if animate{
-        UIView.animate(withDuration: 0.8, delay: 0, options: [.repeat,.curveEaseInOut], animations: {
-            self.imageViewRecording.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
-        }) { (success) in
-            self.imageViewRecording.transform = .identity
-        }
+            var animationOption : UIView.AnimationOptions = [.curveEaseInOut]
+            imageViewRecording.animateViewInScaleEffect(should: true, duration: 0.8, delay: 0, scalex: 1.5, scaleY: 1.5, animationOptions: &animationOption )
         }else{
             self.imageViewRecording.transform = .identity
             self.imageViewRecording.layer.removeAllAnimations()
@@ -74,7 +74,7 @@ class ViewController: UIViewController {
 }
 
 
-//AVCamera functions
+//MARK:AVCamera functions
 extension ViewController : AVcameraViewDelegate{
     
     //MARK: AVCamera setup
@@ -82,7 +82,6 @@ extension ViewController : AVcameraViewDelegate{
     func setupCamera(){
         viewCamera.cameraDelegate = self
         viewCamera.shouldUseDeviceOrientation = true
-        viewCamera.allowAutoRotate = true
     }
     
     //MARK: AVCamera Delegate

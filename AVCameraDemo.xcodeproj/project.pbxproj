@@ -20,6 +20,7 @@
 		E01D3AA324E6154500078055 /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01D3AA224E6154500078055 /* ActivityIndicatorView.swift */; };
 		E01D3AA524E6174E00078055 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E01D3AA424E6174E00078055 /* Colors.xcassets */; };
 		E01D3AA824E627CB00078055 /* UIViewcontroller+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01D3AA724E627CB00078055 /* UIViewcontroller+Extension.swift */; };
+		E0FD13C524E9EF3900F29334 /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0FD13C424E9EF3900F29334 /* UIView+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 		E01D3AA224E6154500078055 /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
 		E01D3AA424E6174E00078055 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		E01D3AA724E627CB00078055 /* UIViewcontroller+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewcontroller+Extension.swift"; sourceTree = "<group>"; };
+		E0FD13C424E9EF3900F29334 /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +165,7 @@
 			isa = PBXGroup;
 			children = (
 				E01D3AA724E627CB00078055 /* UIViewcontroller+Extension.swift */,
+				E0FD13C424E9EF3900F29334 /* UIView+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -301,6 +304,7 @@
 			files = (
 				E01D3A9E24E600C500078055 /* AVcameraView.swift in Sources */,
 				E01D3A7124E5DB5C00078055 /* ViewController.swift in Sources */,
+				E0FD13C524E9EF3900F29334 /* UIView+Extension.swift in Sources */,
 				E01D3AA824E627CB00078055 /* UIViewcontroller+Extension.swift in Sources */,
 				E01D3AA024E6017600078055 /* AVCameraPreviewView.swift in Sources */,
 				E01D3AA324E6154500078055 /* ActivityIndicatorView.swift in Sources */,
