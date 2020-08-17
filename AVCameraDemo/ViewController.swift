@@ -119,20 +119,38 @@ extension ViewController : AVcameraViewDelegate{
     func AVcameraView( didFinishProcessVideoAt url: URL) {
         //save video to lib
 
+        ///Request authorisation to add recoreded video to the photo library
+        func requestAuthorization(completion: @escaping ()->Void) {
+            if PHPhotoLibrary.authorizationStatus() == .notDetermined {
+                PHPhotoLibrary.requestAuthorization { (status) in
+                    DispatchQueue.main.async {
+                        completion()
+                    }
+                }
+            } else if PHPhotoLibrary.authorizationStatus() == .authorized{
+                completion()
+            }
+        }
+        
+        ///Process the result of saving recorded video to the photo library
         func handleViewSaveAction(savedSuccessfully : Bool){
             self.hideActivityIndicator()
-            self.labelTimeDuration.text = "00:00"
-            self.imageViewRecording.isHidden = true
-            DispatchQueue.main.asyncAfter(deadline: .now()+0.2) {
+            UIView.animate(withDuration: 0.4,delay: 0.2, animations: {
+                self.labelTimeDuration.text = "00:00"
+                self.imageViewRecording.isHidden = true
+            }) { (result) in
                 self.showOkAlert(withTitle: "AVCameraDemo", message: savedSuccessfully ? "Succesfully created video and saved in your photo library." : "Failed to create video.please try again.")
             }
         }
     
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { saved, error in
-            DispatchQueue.main.async {
-                handleViewSaveAction(savedSuccessfully: saved)
+        requestAuthorization {
+            PHPhotoLibrary.shared().performChanges({
+                let request = PHAssetCreationRequest.forAsset()
+                request.addResource(with: .video, fileURL: url, options: nil)
+            }) { (result, error) in
+                DispatchQueue.main.async {
+                    handleViewSaveAction(savedSuccessfully: result && error == nil)
+                }
             }
         }
        

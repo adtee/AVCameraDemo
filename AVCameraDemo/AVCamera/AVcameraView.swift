@@ -104,7 +104,7 @@ open class AVcameraView: UIView {
     // MARK: Variable Declarations
     
     public weak var cameraDelegate : AVcameraViewDelegate?
-        
+    
     public var videoQuality : VideoQuality = .high
     
     public var flashEnabled = false
@@ -149,7 +149,7 @@ open class AVcameraView: UIView {
     fileprivate var previewLayer : AVCameraPreviewView!
     
     fileprivate var deviceOrientation : UIDeviceOrientation?
-        
+    
     fileprivate var timer : Timer!
     
     // MARK: Init
@@ -173,6 +173,7 @@ open class AVcameraView: UIView {
             switch AVCaptureDevice.authorizationStatus(for: AVMediaType.video){
             case .authorized:
                 // already authorized
+                validateAuthorisationResult()
                 break
             case .notDetermined:
                 
@@ -183,11 +184,13 @@ open class AVcameraView: UIView {
                         self.setupResult = .notAuthorized
                     }
                     self.sessionQueue.resume()
+                    validateAuthorisationResult()
                 })
             default:
                 
                 // already been asked. Denied access
                 setupResult = .notAuthorized
+                validateAuthorisationResult()
             }
             sessionQueue.async { [unowned self] in
                 self.configureSession()
@@ -195,16 +198,25 @@ open class AVcameraView: UIView {
         }
         
         func validateAuthorisationResult(){
-            sessionQueue.async {
+           
+            sessionQueue.asyncAfter(deadline: .now()+0.2) {
+                
                 switch self.setupResult {
                 case .success:
-                   
                     DispatchQueue.main.async {
                         // Begin Session
                         self.session.startRunning()
                         self.isSessionRunning = self.session.isRunning
                         // Preview layer video orientation can be set only after the connection is created
                         self.previewLayer.videoPreviewLayer.connection?.videoOrientation = self.getPreviewLayerOrientation()
+                        
+                        // Set background audio preference
+                        self.setBackgroundAudioPreference()
+                        
+                        // Subscribe to device rotation notifications
+                        if self.shouldUseDeviceOrientation {
+                            self.subscribeToDeviceOrientationChangeNotifications()
+                        }
                     }
                 case .notAuthorized:
                     // Prompt to App Settings
@@ -221,6 +233,7 @@ open class AVcameraView: UIView {
         
         //Add preview layer
         DispatchQueue.main.async {
+            
             self.previewLayer = AVCameraPreviewView(frame: self.bounds, videoGravity: .resizeAspectFill)
             self.addSubview(self.previewLayer)
             self.sendSubviewToBack(self.previewLayer)
@@ -233,24 +246,7 @@ open class AVcameraView: UIView {
             
             //check authorisation
             checkVideoCaptureAuthorisation()
-            
         }
-        
-       
-        DispatchQueue.main.asyncAfter(deadline: .now()+0.2) {
-            // Subscribe to device rotation notifications
-            
-            if self.shouldUseDeviceOrientation {
-                self.subscribeToDeviceOrientationChangeNotifications()
-            }
-            
-            // Set background audio preference
-            self.setBackgroundAudioPreference()
-            
-            //Check authorisation result
-            validateAuthorisationResult()
-        }
-        
     }
     
     
@@ -291,7 +287,7 @@ open class AVcameraView: UIView {
         }
         
         setupPreviewLayerOrientation()
-       
+        
         
     }
     
@@ -352,7 +348,7 @@ open class AVcameraView: UIView {
                 let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
                 movieFileOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
                 self.isVideoRecording = true
-
+                
                 DispatchQueue.main.async {
                     self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.updateTime), userInfo: nil, repeats: true)
                     self.cameraDelegate?.AVcameraView(didBeginRecordingVideo: self.currentCamera)
@@ -612,9 +608,9 @@ open class AVcameraView: UIView {
     
     fileprivate func getVideoOrientation() -> AVCaptureVideoOrientation {
         guard shouldUseDeviceOrientation, let deviceOrientation = self.deviceOrientation else {
-           
+            
             return self.previewLayer!.videoPreviewLayer.connection!.videoOrientation
-           
+            
         }
         
         switch deviceOrientation {
@@ -651,8 +647,6 @@ open class AVcameraView: UIView {
     /// Handle Denied App Privacy Settings
     
     fileprivate func promptToAppSettings() {
-        // prompt User with UIAlertView
-        
         DispatchQueue.main.async(execute: {
             self.cameraDelegate?.AVcameraView(didErrorOccured: "App doesn't have permission to use the camera, please change privacy settings")
         })
@@ -776,7 +770,7 @@ open class AVcameraView: UIView {
 
 extension AVcameraView : AVCaptureFileOutputRecordingDelegate {
     
-     /// Process newly captured video and write it to temporary directory
+    /// Process newly captured video and write it to temporary directory
     public func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         
         if UIDevice.current.isMultitaskingSupported && self.backgroundRecordingID != nil{
@@ -798,7 +792,7 @@ extension AVcameraView : AVCaptureFileOutputRecordingDelegate {
         }
         
     }
-  
+    
 }
 
 // Mark: UIGestureRecognizer Declarations
