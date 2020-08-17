@@ -25,7 +25,7 @@ class AVCameraPreviewView: UIView {
     init(frame: CGRect,  videoGravity: AVCameraVideoRecordingGravity) {
         self.videoGravity = videoGravity
         super.init(frame: frame)
-        self.backgroundColor = UIColor.black
+        self.backgroundColor = .black
     }
     
     required init?(coder aDecoder: NSCoder) {

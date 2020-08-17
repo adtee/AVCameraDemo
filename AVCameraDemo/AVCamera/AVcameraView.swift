@@ -169,6 +169,10 @@ open class AVcameraView: UIView {
         
         ///Check status of Camera and microphone usage authorisation
         func checkVideoCaptureAuthorisation(){
+            sessionQueue.async { [unowned self] in
+                self.configureSession()
+            }
+            
             // Test authorization status for Camera and Micophone
             switch AVCaptureDevice.authorizationStatus(for: AVMediaType.video){
             case .authorized:
@@ -183,8 +187,8 @@ open class AVcameraView: UIView {
                     if !granted {
                         self.setupResult = .notAuthorized
                     }
-                    self.sessionQueue.resume()
                     validateAuthorisationResult()
+                    self.sessionQueue.resume()
                 })
             default:
                 
@@ -192,32 +196,33 @@ open class AVcameraView: UIView {
                 setupResult = .notAuthorized
                 validateAuthorisationResult()
             }
-            sessionQueue.async { [unowned self] in
-                self.configureSession()
-            }
+            
         }
         
         func validateAuthorisationResult(){
            
-            sessionQueue.asyncAfter(deadline: .now()+0.2) {
+            DispatchQueue.main.asyncAfter(deadline: .now()+0.15) {
+                    self.addSubview(self.previewLayer)
+                    self.sendSubviewToBack(self.previewLayer)
+              
                 
                 switch self.setupResult {
                 case .success:
-                    DispatchQueue.main.async {
                         // Begin Session
-                        self.session.startRunning()
-                        self.isSessionRunning = self.session.isRunning
-                        // Preview layer video orientation can be set only after the connection is created
-                        self.previewLayer.videoPreviewLayer.connection?.videoOrientation = self.getPreviewLayerOrientation()
-                        
-                        // Set background audio preference
-                        self.setBackgroundAudioPreference()
-                        
-                        // Subscribe to device rotation notifications
-                        if self.shouldUseDeviceOrientation {
-                            self.subscribeToDeviceOrientationChangeNotifications()
-                        }
+                    
+                    self.session.startRunning()
+                    self.isSessionRunning = self.session.isRunning
+                    // Preview layer video orientation can be set only after the connection is created
+                    self.previewLayer.videoPreviewLayer.connection?.videoOrientation = self.getPreviewLayerOrientation()
+                    
+                    // Set background audio preference
+                    self.setBackgroundAudioPreference()
+                    
+                    // Subscribe to device rotation notifications
+                    if self.shouldUseDeviceOrientation {
+                        self.subscribeToDeviceOrientationChangeNotifications()
                     }
+                   
                 case .notAuthorized:
                     // Prompt to App Settings
                     self.promptToAppSettings()
@@ -227,6 +232,7 @@ open class AVcameraView: UIView {
                         self.cameraDelegate?.AVcameraView(didErrorOccured: "Unable to capture video")
                     })
                 }
+                
             }
         }
         
@@ -235,8 +241,7 @@ open class AVcameraView: UIView {
         DispatchQueue.main.async {
             
             self.previewLayer = AVCameraPreviewView(frame: self.bounds, videoGravity: .resizeAspectFill)
-            self.addSubview(self.previewLayer)
-            self.sendSubviewToBack(self.previewLayer)
+            
             
             // Add Gesture Recognizers
             self.addGestureRecognizers()
@@ -366,7 +371,6 @@ open class AVcameraView: UIView {
         
         let currenTime = CMTimeGetSeconds((self.movieFileOutput?.recordedDuration) ?? CMTime.zero)
         let timeString = String.init().appendingFormat("%.2d:%.2d",Int(currenTime/60),Int(currenTime.truncatingRemainder(dividingBy: 60)))
-        print("current time \(currenTime) & Display text is \(timeString)")
         DispatchQueue.main.async {
             self.cameraDelegate?.AVcameraView(recorded:timeString)
         }
@@ -626,24 +630,7 @@ open class AVcameraView: UIView {
             return .portrait
         }
     }
-    
-    fileprivate func getImageOrientation(forCamera: CameraSelection) -> UIImage.Orientation {
-        guard shouldUseDeviceOrientation, let deviceOrientation = self.deviceOrientation else { return forCamera == .rear ? .right : .leftMirrored }
-        
-        switch deviceOrientation {
-        case .landscapeLeft:
-            return forCamera == .rear ? .up : .downMirrored
-        case .landscapeRight:
-            return forCamera == .rear ? .down : .upMirrored
-        case .portraitUpsideDown:
-            return forCamera == .rear ? .left : .rightMirrored
-        default:
-            return forCamera == .rear ? .right : .leftMirrored
-        }
-    }
-    
-    
-    
+   
     /// Handle Denied App Privacy Settings
     
     fileprivate func promptToAppSettings() {

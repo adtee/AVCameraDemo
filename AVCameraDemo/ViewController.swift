@@ -87,7 +87,7 @@ extension ViewController : AVcameraViewDelegate{
     //MARK: AVCamera Delegate
     
     func AVcameraView(didBeginRecordingVideo camera: AVcameraView.CameraSelection) {
-        print("Did Begin Recording")
+        //Did begin recording video
         DispatchQueue.main.async {
             self.imageViewRecording.isHidden = false
             
@@ -105,7 +105,7 @@ extension ViewController : AVcameraViewDelegate{
     }
     
     func AVcameraView(didFinishRecordingVideo camera: AVcameraView.CameraSelection) {
-        print("Did finish Recording")
+        //Did finish processing video
         DispatchQueue.main.async {
             self.showActivityIndicatior(withMessage: "Processing Video")
             self.imageViewRecording.isHidden = true
@@ -144,6 +144,7 @@ extension ViewController : AVcameraViewDelegate{
         }
     
         requestAuthorization {
+            //Save video to photo Library
             PHPhotoLibrary.shared().performChanges({
                 let request = PHAssetCreationRequest.forAsset()
                 request.addResource(with: .video, fileURL: url, options: nil)
