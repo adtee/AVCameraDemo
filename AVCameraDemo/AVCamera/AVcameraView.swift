@@ -655,7 +655,7 @@ open class AVcameraView: UIView {
                 return AVCaptureSession.Preset.hd4K3840x2160.rawValue
             }
             else {
-                print("[SwiftyCam]: Resolution 3840x2160 not supported")
+                print("ERROR: Resolution 3840x2160 not supported")
                 return AVCaptureSession.Preset.high.rawValue
             }
         }
@@ -735,7 +735,7 @@ open class AVcameraView: UIView {
         }
     }
     
-    /// Sets whether SwiftyCam should enable background audio from other applications or sources
+    /// Sets whether should enable background audio from other applications or sources
     
     fileprivate func setBackgroundAudioPreference() {
         guard allowBackgroundAudio == true else {
